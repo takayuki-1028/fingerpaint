@@ -17,38 +17,38 @@
 ScribbleArea::ScribbleArea(QWidget *parent)
     : QWidget(parent)
 {
-	GetSystemTimeAsFileTime(&launchTime);
+	GetSystemTimeAsFileTime(&launchTime);					//システムタイムをファイルタイムとして取得する
 
-    setAttribute(Qt::WA_AcceptTouchEvents);
-    setAttribute(Qt::WA_StaticContents);
-    modified = false;
+    setAttribute(Qt::WA_AcceptTouchEvents);					//WA_AcceptTouchEvents属性の設定
+    setAttribute(Qt::WA_StaticContents);					//WA_StaticContents属性の設定
+    modified = false;										//ScribbleAreaに変更がない状態にする
 
-    myPenColors
+    myPenColors												//Qcolorで指定した色をリスト化して保存
             << QColor("green") << QColor("purple") << QColor("red") << QColor("blue")<< QColor("yellow")
             << QColor("pink") << QColor("orange") << QColor("brown")<< QColor("grey") << QColor("black");
 
-	this->resetPoints();
+	this->resetPoints();									//初期化
 
-	qApp->installEventFilter(this);
+	qApp->installEventFilter(this);							//イベントのインストール
 }
 
 
 bool
-ScribbleArea::openVolume(const QString &fileName)
+ScribbleArea::openVolume(const QString &fileName)			//ボリュームデータの読み込み
 {
     return true;
 }
 
 bool
-ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
+ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)	//ファイル名とフォーマットを指定？？？
 {
     QImage visibleImage = *qtImage;
 
-    resizeImage(&visibleImage, size());
+    resizeImage(&visibleImage, size());										//resizeImage呼び出し:サイズ変更
 
-    if (visibleImage.save(fileName, fileFormat))
+    if (visibleImage.save(fileName, fileFormat))							//visibleImage.saveのファイル名とフォーマットに変更がない場合
 	{
-        modified = false;
+        modified = false;													//変更なしの状態にする
         return true;
     }
 	else
@@ -58,7 +58,7 @@ ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 }
 
 void
-ScribbleArea::resetView()
+ScribbleArea::resetView()		//File→Reset View
 {
 	initializeViewParams();
 	setResiliceImage();
@@ -66,10 +66,10 @@ ScribbleArea::resetView()
 }
 
 
-void ScribbleArea::print() {}
+void ScribbleArea::print() {}	//File→Print 
 
 
-void ScribbleArea::displayModeString(QPainter* painter)
+void ScribbleArea::displayModeString(QPainter* painter)													//モードの決定
 {
 	int	string_start_x = 1450;
 	int	string_start_y = 30;
@@ -84,21 +84,21 @@ void ScribbleArea::displayModeString(QPainter* painter)
 	switch (this->fingerTouchMode)
 	{
 		//case MODE_NO_FINGER:	sprintf(modeString, "NO FINGER");							break;
-		case MODE_1_FINGER:		sprintf(modeString, "2D drag (1 FINGER)");					break;
-		case MODE_2_FINGERS:	sprintf(modeString, "Scale and 2D rotation (2 FINGERS)");	break;
-		case MODE_3_FINGERS:	sprintf(modeString, "Slice paging (3 FINGERS)");			break;
-		case MODE_4_FINGERS:	sprintf(modeString, "3D rotation (4 FINGERS)");				break;
-		case MODE_5_FINGERS:	sprintf(modeString, "Grayscaling (5 FINGERS)");				break;
-		//case MODE_6_FINGERS:	sprintf(modeString, "Spot MIP (6 FINGERS)");				break;
-		case MODE_10_FINGERS:	sprintf(modeString, "Reset view (10 FINGERS)");				break;
+		case MODE_1_FINGER:		sprintf(modeString, "2D drag (1 FINGER)");					break;			//1本モード	  画像の平行移動
+		case MODE_2_FINGERS:	sprintf(modeString, "Scale and 2D rotation (2 FINGERS)");	break;			//２本モード　画像の回転、拡大縮小
+		case MODE_3_FINGERS:	sprintf(modeString, "Slice paging (3 FINGERS)");			break;			//３本モード　画像の奥行
+		case MODE_4_FINGERS:	sprintf(modeString, "3D rotation (4 FINGERS)");				break;			//４本モード　画像の軸回転
+		case MODE_5_FINGERS:	sprintf(modeString, "Grayscaling (5 FINGERS)");				break;			//５本モード　画像の明暗
+		case MODE_6_FINGERS:	sprintf(modeString, "Spot MIP (6 FINGERS)");				break;			//６本モード
+		case MODE_10_FINGERS:	sprintf(modeString, "Reset view (10 FINGERS)");				break;			//１０本モード　リセット
 
-		
-		case MODE_TMP_1_FINGER:		sprintf(modeString, "2D drag (1 FINGER)");					break;
+																											//それぞれのモードの待機状態（指を動かす前でモード変更可能状態）
+		case MODE_TMP_1_FINGER:		sprintf(modeString, "2D drag (1 FINGER)");					break;		
 		case MODE_TMP_2_FINGERS:	sprintf(modeString, "Scale and 2D rotation (2 FINGERS)");	break;
 		case MODE_TMP_3_FINGERS:	sprintf(modeString, "Slice paging (3 FINGERS)");			break;
 		case MODE_TMP_4_FINGERS:	sprintf(modeString, "3D rotation (4 FINGERS)");				break;
 		case MODE_TMP_5_FINGERS:	sprintf(modeString, "Grayscaling (5 FINGERS)");				break;
-		//case MODE_TMP_6_FINGERS:	sprintf(modeString, "Spot MIP (6 FINGERS)");				break;
+		case MODE_TMP_6_FINGERS:	sprintf(modeString, "Spot MIP (6 FINGERS)");				break;
 		case MODE_TMP_10_FINGERS:	sprintf(modeString, "Reset view (10 FINGERS)");				break;
 
 		//case MODE_TMP_1_FINGER:		sprintf(modeString, "TMP 1 FINGER");		break;
@@ -110,14 +110,14 @@ void ScribbleArea::displayModeString(QPainter* painter)
 		//case MODE_TMP_10_FINGERS:	sprintf(modeString, "TMP 10 FINGERS");		break;
 
 		//case MODE_INT_3_FINGERS:	sprintf(modeString, "Slice paging (FIXED)");	break;
-		case MODE_INT_4_FINGERS:	sprintf(modeString, "3D rotation (FIXED)");		break;
+		case MODE_INT_4_FINGERS:	sprintf(modeString, "3D rotation (FIXED)");		break;					//4本モード時の軸を決めるモード
 		//case MODE_INT_5_FINGERS:	sprintf(modeString, "Grayscaling (FIXED)");		break;
 
 		default:
 			break;
 	}
 
-	painter->drawText(QPoint(string_start_x, string_start_y), modeString);
+	painter->drawText(QPoint(string_start_x, string_start_y), modeString);									//現在のモードを表示
 }
 
 void
@@ -126,34 +126,34 @@ ScribbleArea::paintEvent(QPaintEvent *event)
 	QPainter painter(this);
 	const QRect rect = event->rect();
 
-	if (volume == NULL || volImage == NULL)	return;
+	if (volume == NULL || volImage == NULL)	return;															//volumeかvolImageがNULLのとき関数から抜ける
 
 	//////////////////////////////////////////////////////////this->resetTimer();
 	
-	if( qtImage!=NULL)	painter.drawImage(rect.topLeft(), *qtImage, rect);
+	if( qtImage!=NULL)	painter.drawImage(rect.topLeft(), *qtImage, rect);									//qtImageがNULLじゃない時　qtImageの画像を表示？
 
-	drawTime += getTimeInMillisec();	drawCount++;
+	drawTime += getTimeInMillisec();	drawCount++;														//触ってからの時間を計測
 	//this->showTime("image draw");
 
-	int		iDiameter = BUTTON_DIAMETER;
+	int		iDiameter = BUTTON_DIAMETER;																	//120
 	qreal	qrDiameter = qreal(iDiameter);
 	int		shift_y_for_fix = 50;
 
-	int	qfmb_pos_x = iDiameter / 3;	// qfmb: quit fixed mode button
+	int	qfmb_pos_x = iDiameter / 3;																			// qfmb: quit fixed mode button
 	int	qfmb_pos_y = iDiameter / 3;
 	int qfmb_iDiameter = iDiameter / 2;
 	qreal	qfmb_qrD = qreal(qfmb_iDiameter);
 
 
 	
-	if (rect_s.isEmpty())	rect_s.setSize(QSizeF(qrDiameter, qrDiameter));		// INT. 4F MODE: ROT AXIS START POINT
-	if (rect_e.isEmpty())	rect_e.setSize(QSizeF(qrDiameter, qrDiameter));		// INT. 4F MODE: ROT AXIS END POINT
-	if (rect_b.isEmpty())	rect_b.setSize(QSizeF(qfmb_qrD, qfmb_qrD));			// INT. nF MODE QUIT BUTTON
+	if (rect_s.isEmpty())	rect_s.setSize(QSizeF(qrDiameter, qrDiameter));									// rect_sが空の時　INT. 4F MODE: ROT AXIS START POINT
+	if (rect_e.isEmpty())	rect_e.setSize(QSizeF(qrDiameter, qrDiameter));									// rect_eが空の時  INT. 4F MODE: ROT AXIS END POINT
+	if (rect_b.isEmpty())	rect_b.setSize(QSizeF(qfmb_qrD, qfmb_qrD));										// rect_bが空の時  INT. nF MODE QUIT BUTTON
 
-	if (INTmode3_shift_button.isEmpty())	INTmode3_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));
-	if (INTmode4_shift_button.isEmpty())	INTmode4_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));
-	if (INTmode5_shift_button.isEmpty())	INTmode5_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));
-
+	if (INTmode3_shift_button.isEmpty())	INTmode3_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));	//INTmode3_shift_buttonが空の時
+	if (INTmode4_shift_button.isEmpty())	INTmode4_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));	//INTmode4_shift_buttonが空の時
+	if (INTmode5_shift_button.isEmpty())	INTmode5_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));	//INTmode5_shift_buttonが空の時
+	if (INTmode6_shift_button.isEmpty())	INTmode6_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));	//INTmode5_shift_buttonが空の時
 
 	
 
@@ -252,6 +252,12 @@ ScribbleArea::paintEvent(QPaintEvent *event)
 			painter.drawEllipse(rect_b);
 			break;
 #endif
+		case MODE_TMP_6_FINGERS:
+
+			painter.setPen(QPen(Qt::yellow, penWidth_button));	// INT. 6F MODE: FIX BUTTON
+			INTmode6_shift_button.moveCenter(QPoint((top_pos.x), (top_pos.y)));
+			painter.drawEllipse(INTmode6_shift_button);
+			break;
 
 		default:
 			break;
@@ -279,7 +285,7 @@ ScribbleArea::resizeEvent(QResizeEvent *event)
 void
 ScribbleArea::resizeImage(QImage *image, const QSize &newSize)
 {
-    if (image->size() == newSize)	return;
+    if (image->size() == newSize)	return;						//サイズが同じ時関数を抜ける。
 
     QImage newImage(newSize, QImage::Format_RGB32);
     newImage.fill(qRgb(255, 255, 255));
@@ -737,7 +743,7 @@ ScribbleArea::updateFingerTouchMode(const QTouchEvent::TouchPoint touchPoint)
 {
 	if (fingerTouchNum == 0 || fingerTouchNum > 10)	return;
 
-	if (fingerTouchMode == 0)	// NONE mode
+	if (fingerTouchMode == MODE_NO_FINGER)	// NONE mode
 	{
 		fingerTouchMode = -fingerTouchNum;
 		return;
@@ -752,7 +758,7 @@ ScribbleArea::updateFingerTouchMode(const QTouchEvent::TouchPoint touchPoint)
 			}
 
 			///////////
-			if (fingerTouchMode == MODE_TMP_3_FINGERS || fingerTouchMode == MODE_TMP_4_FINGERS || fingerTouchMode == MODE_TMP_5_FINGERS)
+			if (fingerTouchMode == MODE_TMP_3_FINGERS || fingerTouchMode == MODE_TMP_4_FINGERS || fingerTouchMode == MODE_TMP_5_FINGERS || fingerTouchMode == MODE_TMP_6_FINGERS)
 			{
 				int range = BUTTON_DIAMETER/2;
 
@@ -770,6 +776,11 @@ ScribbleArea::updateFingerTouchMode(const QTouchEvent::TouchPoint touchPoint)
 
 				if (startPos[5].x - range <= INTmode5_shift_button.center().x() && INTmode5_shift_button.center().x() <= startPos[5].x + range &&
 					startPos[5].y - range <= INTmode5_shift_button.center().y() && INTmode5_shift_button.center().y() <= startPos[5].y + range)
+				{
+					return;
+				}
+				if (startPos[6].x - range <= INTmode6_shift_button.center().x() && INTmode6_shift_button.center().x() <= startPos[6].x + range &&
+					startPos[6].y - range <= INTmode6_shift_button.center().y() && INTmode6_shift_button.center().y() <= startPos[6].y + range)
 				{
 					return;
 				}
@@ -853,6 +864,59 @@ ScribbleArea::sort4points()	// only for 4 fingers mode
 		case 3:	sortedIndices[2] = 1;	sortedIndices[3] = 2;	break;
 		default:	break;
 	}
+
+	pointsSorted = true;
+}
+void
+ScribbleArea::sort6points()																		// ６本モードの時の触った場所の並び替え
+{
+	if (pointsSorted == true)	return;
+
+	sortedIndices2[0] = 0;
+
+	int closestTo0 = 1;
+	int closestTo1 = 2;
+	float exchangef = 0;
+	float minDistanceTo0 = get_distance_2D(&(startPos[0]), &(startPos[1]));
+	float minDistanceTo1 = get_distance_2D(&(startPos[0]), &(startPos[2]));
+
+	if (minDistanceTo0 > minDistanceTo1) {
+		exchangef = minDistanceTo0;
+		minDistanceTo0 = minDistanceTo1;
+		minDistanceTo1 = exchangef;
+		closestTo0 = 2;
+		closestTo1 = 1;
+	}
+	for (int i = 3; i < 6; i++)
+	{
+		float distance = get_distance_2D(&(startPos[0]), &(startPos[i]));
+
+		if (distance < minDistanceTo0)
+		{
+			closestTo1 = closestTo0;
+			minDistanceTo1 = minDistanceTo0;
+			closestTo0 = i;
+			minDistanceTo0 = distance;
+
+		}
+		else if (distance < minDistanceTo1)
+		{
+			closestTo1 = i;
+			minDistanceTo1 = distance;
+		}
+	}
+
+	sortedIndices2[1] = closestTo0;
+	sortedIndices2[2] = closestTo1;
+
+	int x = 3;
+	for (int i = 1; i < 6; i++) {
+		if (closestTo0 != i && closestTo1 != i) {
+			sortedIndices2[x] = i;
+			x++;
+		}
+	}
+
 
 	pointsSorted = true;
 }
@@ -1045,7 +1109,7 @@ ScribbleArea::process3fingerINTMode()
 			case MODE_3_FINGERS:	distance = (qMax(qMax(currentPos[0].y - startPos[0].y, currentPos[1].y - startPos[1].y), currentPos[2].y - startPos[2].y) / 3) * psize; 	break;
 			case MODE_4_FINGERS:	distance = (qMax(qMax(qMax(currentPos[0].y - startPos[0].y, currentPos[1].y - startPos[1].y), currentPos[2].y - startPos[2].y), currentPos[3].y - startPos[3].y) / 4) * psize;	break;
 			case MODE_5_FINGERS:	distance = (qMax(qMax(qMax(qMax(currentPos[0].y - startPos[0].y, currentPos[1].y - startPos[1].y), currentPos[2].y - startPos[2].y), currentPos[3].y - startPos[3].y), currentPos[4].y - startPos[4].y) / 5) * psize;	break;
-		
+
 			default:
 				break;
 		}
@@ -1283,9 +1347,32 @@ void
 ScribbleArea::process6fingerMode()
 {
 	VOL_RAYCASTER;
-	
 	setResiliceImage();
 }
+
+
+void
+ScribbleArea::process6fingerTMPMode()
+{
+
+	sort6points();
+
+	VOL_VECTOR2D p1, p2;
+	VOL_VECTOR2D midpoint;
+	p1.x = p1.y = p2.x = p2.y = 0;
+	midpoint.x = midpoint.y = 0;
+
+	circleOf3Point(startPos[sortedIndices2[0]].x, startPos[sortedIndices2[0]].y, startPos[sortedIndices2[1]].x, startPos[sortedIndices2[1]].y, startPos[sortedIndices2[2]].x, startPos[sortedIndices2[2]].y, &p1.x, &p1.y);
+	circleOf3Point(startPos[sortedIndices2[3]].x, startPos[sortedIndices2[3]].y, startPos[sortedIndices2[4]].x, startPos[sortedIndices2[4]].y, startPos[sortedIndices2[5]].x, startPos[sortedIndices2[5]].y, &p2.x, &p2.y);
+
+	get_midpoint_2D(&p1, &p2, &midpoint);
+	top_pos = midpoint;
+
+	int range = BUTTON_DIAMETER / 2;
+
+}
+
+
 
 
 void
@@ -1338,7 +1425,7 @@ ScribbleArea::processTouchEvent(QEvent *event)
 					case MODE_TMP_5_FINGERS:	process5fingerTMPMode();			break;
 					case MODE_INT_5_FINGERS:	process5fingerINTMode();			break;
 					case MODE_6_FINGERS:        process6fingerMode();				break;
-
+					case MODE_TMP_6_FINGERS:	process6fingerTMPMode();			break;
 
 					default:						break;
 				}
@@ -1467,9 +1554,9 @@ ScribbleArea::getTimeInMillisec()
 {
 	FILETIME currentTimne;
 
-	GetSystemTimeAsFileTime(&currentTimne);
+	GetSystemTimeAsFileTime(&currentTimne);											//現在の時間を取得
 
-	return ((double)GetFileTimeDifference(&currentTimne, &startTime)) / 1000000.0;
+	return ((double)GetFileTimeDifference(&currentTimne, &startTime)) / 1000000.0;	//（現在の時間ー始めた時間）*100/1000000を返す
 }
 
 void
@@ -1498,4 +1585,32 @@ ScribbleArea::showTimeStatistics()
 
 	LQresliceTime = LQconvertTime = HQresliceTime = HQconvertTime = drawTime = 0;
 	LQresliceCount = LQconvertCount = HQresliceCount = HQconvertCount = drawCount = 0;
+}
+
+void
+ScribbleArea::circleOf3Point(float x1, float  y1, float x2, float y2, float x3, float y3, float *cx, float *cy)
+{
+	float 	ox, oy, a, b, c, d;
+	float 	r1, r2, r3;
+
+
+	a = x2 - x1;
+	b = y2 - y1;
+	c = x3 - x1;
+	d = y3 - y1;
+
+
+	if ((a && d) || (b && c)) {
+		ox = x1 + (d * (a * a + b * b) - b * (c * c + d * d)) / (a * d - b * c) / 2;
+		if (b) {
+			oy = (a * (x1 + x2 - ox - ox) + b * (y1 + y2)) / b / 2;
+		}
+		else {
+			oy = (c * (x1 + x3 - ox - ox) + d * (y1 + y3)) / d / 2;
+		}
+		*cx = ox;
+		*cy = oy;
+	}
+
+
 }

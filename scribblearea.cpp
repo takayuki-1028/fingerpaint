@@ -867,63 +867,11 @@ ScribbleArea::sort4points()	// only for 4 fingers mode
 
 	pointsSorted = true;
 }
-void
-ScribbleArea::sort6points()																		// ‚U–{ƒ‚[ƒh‚ÌŽž‚ÌG‚Á‚½êŠ‚Ì•À‚Ñ‘Ö‚¦
-{
-	if (pointsSorted == true)	return;
 
-	sortedIndices2[0] = 0;
-
-	int closestTo0 = 1;
-	int closestTo1 = 2;
-	float exchangef = 0;
-	float minDistanceTo0 = get_distance_2D(&(startPos[0]), &(startPos[1]));
-	float minDistanceTo1 = get_distance_2D(&(startPos[0]), &(startPos[2]));
-
-	if (minDistanceTo0 > minDistanceTo1) {
-		exchangef = minDistanceTo0;
-		minDistanceTo0 = minDistanceTo1;
-		minDistanceTo1 = exchangef;
-		closestTo0 = 2;
-		closestTo1 = 1;
-	}
-	for (int i = 3; i < 6; i++)
-	{
-		float distance = get_distance_2D(&(startPos[0]), &(startPos[i]));
-
-		if (distance < minDistanceTo0)
-		{
-			closestTo1 = closestTo0;
-			minDistanceTo1 = minDistanceTo0;
-			closestTo0 = i;
-			minDistanceTo0 = distance;
-
-		}
-		else if (distance < minDistanceTo1)
-		{
-			closestTo1 = i;
-			minDistanceTo1 = distance;
-		}
-	}
-
-	sortedIndices2[1] = closestTo0;
-	sortedIndices2[2] = closestTo1;
-
-	int x = 3;
-	for (int i = 1; i < 6; i++) {
-		if (closestTo0 != i && closestTo1 != i) {
-			sortedIndices2[x] = i;
-			x++;
-		}
-	}
-
-
-	pointsSorted = true;
-}
 
 
 void
-ScribbleArea::resetPoints()
+ScribbleArea::resetPoints()	//G‚Á‚½‰ÓŠ‚È‚Ç‚ÌƒŠƒZƒbƒg	
 {
 	for (int i = 0; i < MAX_TOUCH_NUM; i++)
 	{
@@ -1355,7 +1303,52 @@ void
 ScribbleArea::process6fingerTMPMode()
 {
 
-	sort6points();
+
+	sortedIndices2[0] = 0;
+
+	int closestTo0 = 1;
+	int closestTo1 = 2;
+	float exchangef = 0;
+	float minDistanceTo0 = get_distance_2D(&(startPos[0]), &(startPos[1]));
+	float minDistanceTo1 = get_distance_2D(&(startPos[0]), &(startPos[2]));
+
+	if (minDistanceTo0 > minDistanceTo1) {
+		exchangef = minDistanceTo0;
+		minDistanceTo0 = minDistanceTo1;
+		minDistanceTo1 = exchangef;
+		closestTo0 = 2;
+		closestTo1 = 1;
+	}
+	for (int i = 3; i < 6; i++)
+	{
+		float distance = get_distance_2D(&(startPos[0]), &(startPos[i]));
+
+		if (distance < minDistanceTo0)
+		{
+			closestTo1 = closestTo0;
+			minDistanceTo1 = minDistanceTo0;
+			closestTo0 = i;
+			minDistanceTo0 = distance;
+
+		}
+		else if (distance < minDistanceTo1)
+		{
+			closestTo1 = i;
+			minDistanceTo1 = distance;
+		}
+	}
+
+	sortedIndices2[1] = closestTo0;
+	sortedIndices2[2] = closestTo1;
+
+	int x = 3;
+	for (int i = 1; i < 6; i++) {
+		if (closestTo0 != i && closestTo1 != i) {
+			sortedIndices2[x] = i;
+			x++;
+		}
+	}
+	pointsSorted = true;
 
 	VOL_VECTOR2D p1, p2;
 	VOL_VECTOR2D midpoint;
@@ -1364,7 +1357,7 @@ ScribbleArea::process6fingerTMPMode()
 
 	circleOf3Point(startPos[sortedIndices2[0]].x, startPos[sortedIndices2[0]].y, startPos[sortedIndices2[1]].x, startPos[sortedIndices2[1]].y, startPos[sortedIndices2[2]].x, startPos[sortedIndices2[2]].y, &p1.x, &p1.y);
 	circleOf3Point(startPos[sortedIndices2[3]].x, startPos[sortedIndices2[3]].y, startPos[sortedIndices2[4]].x, startPos[sortedIndices2[4]].y, startPos[sortedIndices2[5]].x, startPos[sortedIndices2[5]].y, &p2.x, &p2.y);
-
+	
 	get_midpoint_2D(&p1, &p2, &midpoint);
 	top_pos = midpoint;
 

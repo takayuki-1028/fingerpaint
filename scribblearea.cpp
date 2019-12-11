@@ -69,7 +69,7 @@ ScribbleArea::resetView()		//File→Reset View
 void ScribbleArea::print() {}	//File→Print 
 
 
-void ScribbleArea::displayModeString(QPainter* painter)													//モードの決定
+void ScribbleArea::displayModeString(QPainter* painter)													//現在のモードの表示
 {
 	int	string_start_x = 1450;
 	int	string_start_y = 30;
@@ -112,7 +112,7 @@ void ScribbleArea::displayModeString(QPainter* painter)													//モードの決
 		//case MODE_INT_3_FINGERS:	sprintf(modeString, "Slice paging (FIXED)");	break;
 		case MODE_INT_4_FINGERS:	sprintf(modeString, "3D rotation (FIXED)");		break;					//4本モード時の軸を決めるモード
 		//case MODE_INT_5_FINGERS:	sprintf(modeString, "Grayscaling (FIXED)");		break;
-
+		//case MODE_INT_6_FINGERS:	sprintf(modeString, "Spot MIP (6 FINGERS)");	break;
 		default:
 			break;
 	}
@@ -153,7 +153,7 @@ ScribbleArea::paintEvent(QPaintEvent *event)
 	if (INTmode3_shift_button.isEmpty())	INTmode3_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));	//INTmode3_shift_buttonが空の時
 	if (INTmode4_shift_button.isEmpty())	INTmode4_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));	//INTmode4_shift_buttonが空の時
 	if (INTmode5_shift_button.isEmpty())	INTmode5_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));	//INTmode5_shift_buttonが空の時
-	if (INTmode6_shift_button.isEmpty())	INTmode6_shift_button.setSize(QSizeF(qrDiameter, qrDiameter));	//INTmode5_shift_buttonが空の時
+
 
 	
 
@@ -255,7 +255,16 @@ ScribbleArea::paintEvent(QPaintEvent *event)
 		case MODE_TMP_6_FINGERS:
 
 			painter.setPen(QPen(Qt::yellow, penWidth_button));	// INT. 6F MODE: FIX BUTTON
-			INTmode6_shift_button.moveCenter(QPoint((top_pos.x), (top_pos.y)));
+			INTmode6_shift_button.setSize(QSizeF(distance6.width, distance6.height));
+			INTmode6_shift_button.moveCenter(QPoint(middle_pos.x , middle_pos.y ));
+			painter.drawEllipse(INTmode6_shift_button);
+			break;
+
+		case MODE_INT_6_FINGERS:
+
+			painter.setPen(QPen(Qt::yellow, penWidth_button));	// INT. 6F MODE: FIX BUTTON
+			INTmode6_shift_button.setSize(QSizeF(distance6.width, distance6.height));
+			INTmode6_shift_button.moveCenter(QPoint(middle_pos.x , middle_pos.y ));
 			painter.drawEllipse(INTmode6_shift_button);
 			break;
 
@@ -1057,7 +1066,6 @@ ScribbleArea::process3fingerINTMode()
 			case MODE_3_FINGERS:	distance = (qMax(qMax(currentPos[0].y - startPos[0].y, currentPos[1].y - startPos[1].y), currentPos[2].y - startPos[2].y) / 3) * psize; 	break;
 			case MODE_4_FINGERS:	distance = (qMax(qMax(qMax(currentPos[0].y - startPos[0].y, currentPos[1].y - startPos[1].y), currentPos[2].y - startPos[2].y), currentPos[3].y - startPos[3].y) / 4) * psize;	break;
 			case MODE_5_FINGERS:	distance = (qMax(qMax(qMax(qMax(currentPos[0].y - startPos[0].y, currentPos[1].y - startPos[1].y), currentPos[2].y - startPos[2].y), currentPos[3].y - startPos[3].y), currentPos[4].y - startPos[4].y) / 5) * psize;	break;
-
 			default:
 				break;
 		}
@@ -1294,7 +1302,7 @@ ScribbleArea::process5fingerINTMode()
 void
 ScribbleArea::process6fingerMode()
 {
-	VOL_RAYCASTER;
+	
 	setResiliceImage();
 }
 
@@ -1303,7 +1311,7 @@ void
 ScribbleArea::process6fingerTMPMode()
 {
 
-
+	/*		//3点ずつに分け円を作る方法
 	sortedIndices2[0] = 0;
 
 	int closestTo0 = 1;
@@ -1355,16 +1363,72 @@ ScribbleArea::process6fingerTMPMode()
 	p1.x = p1.y = p2.x = p2.y = 0;
 	midpoint.x = midpoint.y = 0;
 
-	circleOf3Point(startPos[sortedIndices2[0]].x, startPos[sortedIndices2[0]].y, startPos[sortedIndices2[1]].x, startPos[sortedIndices2[1]].y, startPos[sortedIndices2[2]].x, startPos[sortedIndices2[2]].y, &p1.x, &p1.y);
-	circleOf3Point(startPos[sortedIndices2[3]].x, startPos[sortedIndices2[3]].y, startPos[sortedIndices2[4]].x, startPos[sortedIndices2[4]].y, startPos[sortedIndices2[5]].x, startPos[sortedIndices2[5]].y, &p2.x, &p2.y);
+	circleOf3Point(currentPos[sortedIndices2[0]].x, currentPos[sortedIndices2[0]].y, currentPos[sortedIndices2[1]].x, currentPos[sortedIndices2[1]].y, currentPos[sortedIndices2[2]].x, currentPos[sortedIndices2[2]].y, &p1.x, &p1.y);
+	circleOf3Point(currentPos[sortedIndices2[3]].x, currentPos[sortedIndices2[3]].y, currentPos[sortedIndices2[4]].x, currentPos[sortedIndices2[4]].y, currentPos[sortedIndices2[5]].x, currentPos[sortedIndices2[5]].y, &p2.x, &p2.y);
 	
 	get_midpoint_2D(&p1, &p2, &midpoint);
-	top_pos = midpoint;
+	distance6.width=distance6.height= get_distance_2D(&p1, &p2);
+	middle_pos = midpoint;
+	
+	*/
+	//中心から近い2点で円を作る方法
+	VOL_VECTOR2D center6;
 
-	int range = BUTTON_DIAMETER / 2;
+	float exchangef;
+	center6.x = 1000;
+	center6.y = 500;
+	float minDistance_center1 = get_distance_2D(&center6, &(startPos[0]));
+	float minDistance_center2 = get_distance_2D(&center6, &(startPos[1]));
+	closest_center1 = 0;
+	closest_center2 = 1;
+
+	if (minDistance_center1 > minDistance_center2) {
+		exchangef = minDistance_center1;
+		minDistance_center1 = minDistance_center2;
+		minDistance_center2 = exchangef;
+		closest_center1 = 1;
+		closest_center2 = 0;
+	}
+	for (int i = 2; i < 6; i++)
+	{
+		float distance = get_distance_2D(&center6, &(startPos[i]));
+
+		if (distance < minDistance_center1)
+		{
+			closest_center2 = closest_center1;
+			minDistance_center2 = minDistance_center1;
+			closest_center1 = i;
+			minDistance_center1 = distance;
+
+		}
+		else if (distance < minDistance_center2)
+		{
+			closest_center2 = i;
+			minDistance_center2 = distance;
+		}
+	}
+
+	get_midpoint_2D(&currentPos[closest_center1], &currentPos[closest_center2], &middle_pos);
+	distance6.width = distance6.height = get_distance_2D(&currentPos[closest_center1], &currentPos[closest_center2]);
+
+
 
 }
 
+void
+ScribbleArea::process6fingerINTMode()
+{
+	get_midpoint_2D(&currentPos[closest_center1], &currentPos[closest_center2], &middle_pos);
+	distance6.width = distance6.height = get_distance_2D(&currentPos[closest_center1], &currentPos[closest_center2]);
+	QPainter painter(this);
+	int penWidth_button = 8;
+	painter.setPen(QPen(Qt::yellow, penWidth_button));	// INT. 6F MODE: FIX BUTTON
+	INTmode6_shift_button.setSize(QSizeF(distance6.width, distance6.height));
+	INTmode6_shift_button.moveCenter(QPoint(middle_pos.x, middle_pos.y));
+	painter.drawEllipse(INTmode6_shift_button);
+		setResiliceImage();
+	
+}
 
 
 
@@ -1419,6 +1483,7 @@ ScribbleArea::processTouchEvent(QEvent *event)
 					case MODE_INT_5_FINGERS:	process5fingerINTMode();			break;
 					case MODE_6_FINGERS:        process6fingerMode();				break;
 					case MODE_TMP_6_FINGERS:	process6fingerTMPMode();			break;
+					case MODE_INT_6_FINGERS:	process6fingerINTMode();			break;
 
 					default:						break;
 				}
@@ -1464,6 +1529,11 @@ ScribbleArea::processTouchEvent(QEvent *event)
 				{
 					resetPoints();
 					fingerTouchMode = MODE_INT_5_FINGERS;
+				}
+				else if (fingerTouchMode == MODE_INT_6_FINGERS)
+				{
+					resetPoints();
+					fingerTouchMode = MODE_INT_6_FINGERS;
 				}
 				else
 				{

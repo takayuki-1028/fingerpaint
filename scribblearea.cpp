@@ -257,6 +257,8 @@ ScribbleArea::paintEvent(QPaintEvent *event)
 			painter.setPen(QPen(Qt::yellow, penWidth_button));	// INT. 6F MODE: FIX BUTTON
 			INTmode6_shift_button.setSize(QSizeF(distance6.width, distance6.height));
 			INTmode6_shift_button.moveCenter(QPoint(middle_pos.x , middle_pos.y ));
+			INTmode5_shift_button.moveCenter(QPoint(top_pos.x, (top_pos.y - iDiameter)));
+			painter.drawEllipse(INTmode5_shift_button);
 			painter.drawEllipse(INTmode6_shift_button);
 			break;
 
@@ -1272,7 +1274,7 @@ ScribbleArea::process5fingerTMPMode()
 		}
 	}
 
-	int range = BUTTON_DIAMETER/2;
+	//int range = BUTTON_DIAMETER/2;
 
 	//if (startPos[5].x - range <= INTmode5_shift_button.center().x() && INTmode5_shift_button.center().x() <= startPos[5].x + range && startPos[5].y - range <= INTmode5_shift_button.center().y() && INTmode5_shift_button.center().y() <= startPos[5].y + range) //An area of button to exit INTmode
 	//{
@@ -1411,21 +1413,30 @@ ScribbleArea::process6fingerTMPMode()
 	get_midpoint_2D(&currentPos[closest_center1], &currentPos[closest_center2], &middle_pos);
 	distance6.width = distance6.height = get_distance_2D(&currentPos[closest_center1], &currentPos[closest_center2]);
 
+	top_pos = startPos[0];
+	for (int i = 1; i < 6; i++)
+	{
+		if (startPos[i].y < top_pos.y)
+		{
+			top_pos = startPos[i];
+		}
+	}
 
+	int range = BUTTON_DIAMETER/2;
+
+	if (startPos[6].x - range <= INTmode5_shift_button.center().x() && INTmode5_shift_button.center().x() <= startPos[6].x + range && startPos[6].y - range <= INTmode5_shift_button.center().y() && INTmode5_shift_button.center().y() <= startPos[6].y + range) //An area of button to exit INTmode
+	{
+		fingerTouchMode = MODE_INT_6_FINGERS; //MODE_INT_6_FINGERS confirmed
+	}
 
 }
 
 void
 ScribbleArea::process6fingerINTMode()
 {
-	get_midpoint_2D(&currentPos[closest_center1], &currentPos[closest_center2], &middle_pos);
-	distance6.width = distance6.height = get_distance_2D(&currentPos[closest_center1], &currentPos[closest_center2]);
-	QPainter painter(this);
-	int penWidth_button = 8;
-	painter.setPen(QPen(Qt::yellow, penWidth_button));	// INT. 6F MODE: FIX BUTTON
-	INTmode6_shift_button.setSize(QSizeF(distance6.width, distance6.height));
-	INTmode6_shift_button.moveCenter(QPoint(middle_pos.x, middle_pos.y));
-	painter.drawEllipse(INTmode6_shift_button);
+	get_midpoint_2D(&currentPos[0], &currentPos[1], &middle_pos);
+	distance6.width = distance6.height = get_distance_2D(&currentPos[0], &currentPos[1]);
+
 		setResiliceImage();
 	
 }
